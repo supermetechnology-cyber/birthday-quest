@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bithi's Birthday Quest</title>
+<style>
+:root{--bg:#100f1d;--card:#1b1a2d;--pink:#ff8db5;--lav:#b9a6ff;--gold:#ffd98a;--text:#fff8fc}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%,#39305d 0,transparent 32%),radial-gradient(circle at 90% 85%,#512c4c 0,transparent 30%),var(--bg);display:grid;place-items:center;padding:22px;overflow-x:hidden}
+main{width:min(100%,560px);background:#1b1a2deF;border:1px solid #ffffff20;border-radius:28px;padding:28px 22px;box-shadow:0 22px 80px #0008;text-align:center;position:relative}
+.kicker{color:var(--gold);letter-spacing:.18em;text-transform:uppercase;font-size:.72rem;font-weight:800}
+h1{font-size:clamp(2rem,8vw,3.2rem);line-height:1.05;margin:12px 0;color:#fff}
+h1 span{color:var(--pink)}
+p{line-height:1.65;color:#e7deef}
+.small{font-size:.88rem;color:#bfb5d2}
+button{border:0;border-radius:999px;padding:13px 22px;font-weight:800;font-size:1rem;cursor:pointer;color:#24172c;background:linear-gradient(110deg,var(--gold),var(--pink));box-shadow:0 8px 24px #ff8db544;margin:8px}
+button.secondary{background:#ffffff12;color:white;border:1px solid #ffffff30;box-shadow:none}
+.panel{background:#ffffff09;border:1px solid #ffffff18;border-radius:20px;padding:18px;margin:18px 0}
+.hidden{display:none!important}
+.progress{height:7px;background:#ffffff18;border-radius:20px;overflow:hidden;margin:20px 0}
+#bar{height:100%;width:0;background:linear-gradient(90deg,var(--lav),var(--pink));transition:width .3s}
+#balloons{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.balloon{font-size:2.6rem;background:#ffffff0d;border:1px solid #ffffff18;border-radius:18px;padding:14px 4px;cursor:pointer;transition:transform .15s}
+.balloon:active{transform:scale(.9)}
+#choices{display:flex;flex-wrap:wrap;justify-content:center}
+.choice{background:#ffffff12;color:white;border:1px solid #ffffff30;box-shadow:none}
+#gift{font-size:5rem;cursor:pointer;display:inline-block;transition:transform .2s}
+#gift:hover{transform:rotate(-8deg) scale(1.08)}
+.note{font-size:1.08rem}
+footer{font-size:.75rem;color:#9f95b5;margin-top:20px}
+.spark{position:fixed;pointer-events:none;animation:rise 2.8s linear forwards;font-size:20px}
+@keyframes rise{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(-110vh) rotate(240deg);opacity:0}}
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">A little birthday adventure</div>
+  <section id="intro">
+    <h1>Hey, <span>Bithi!</span> ✨</h1>
+    <p>A tiny birthday quest is waiting for you.<br>Complete three little surprises to unlock your birthday message!</p>
+    <div class="panel"><div style="font-size:3rem">🌙 ⭐ 🎀</div><p class="small">Birthday Edition · Made just for Bithi</p></div>
+    <button onclick="start()">Start the quest →</button>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="kicker" id="stepLabel">Challenge 1 of 3</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div id="challenge"></div>
+    <div id="feedback" class="small" aria-live="polite"></div>
+  </section>
+
+  <section id="final" class="hidden">
+    <div class="kicker">Quest completed</div>
+    <h1>Happy Birthday,<br><span>Bithi!</span> 🎂</h1>
+    <div class="panel">
+      <div style="font-size:3rem">🌷 ✨ 🎈</div>
+      <p class="note">May your new year be filled with happiness, good health, wonderful memories and lots of reasons to smile.</p>
+      <p class="note">Keep learning, keep growing, and keep shining in your own way. May Allah bless you always. 💗</p>
+    </div>
+    <p class="small">A little surprise, made with warm wishes.</p>
+    <button onclick="celebrate()">Celebrate again ✨</button>
+    <button class="secondary" onclick="location.reload()">Play again</button>
+  </section>
+  <footer>Made with kind wishes · Bithi's Birthday Quest</footer>
+</main>
+<script>
+let stage=0, popped=0;
+const $=id=>document.getElementById(id);
+function start(){ $('intro').classList.add('hidden');$('game').classList.remove('hidden');render();}
+function render(){
+  $('feedback').textContent='';
+  $('stepLabel').textContent=`Challenge ${stage+1} of 3`;
+  $('bar').style.width=(stage/3*100)+'%';
+  if(stage===0){
+    $('challenge').innerHTML=`<h2>🎈 Pop the balloons!</h2><p>Tap all 6 balloons to reveal the first surprise.</p><div id="balloons">${Array.from({length:6},(_,i)=>`<button class="balloon" aria-label="Pop balloon ${i+1}" onclick="pop(this)">🎈</button>`).join('')}</div><p class="small" id="count">0 / 6 popped</p>`;
+  }else if(stage===1){
+    $('challenge').innerHTML=`<h2>🌟 Pick a lucky star</h2><p>Choose one star to reveal a little birthday wish.</p><div id="choices"><button class="choice" onclick="star(this)">⭐</button><button class="choice" onclick="star(this)">🌟</button><button class="choice" onclick="star(this)">✨</button></div>`;
+  }else{
+    $('challenge').innerHTML=`<h2>🎁 One last surprise</h2><p>Tap the gift to unlock your birthday message.</p><div id="gift" role="button" tabindex="0" onclick="openGift()">🎁</div>`;
+  }
+}
+function pop(el){if(el.dataset.done)return;el.dataset.done='1';el.textContent='✨';el.disabled=true;popped++;$('count').textContent=`${popped} / 6 popped`;if(popped===6){$('feedback').textContent='Lovely! First surprise unlocked.';setTimeout(next,850)}}
+function star(el){document.querySelectorAll('.choice').forEach(b=>b.disabled=true);el.textContent='💖';$('feedback').textContent='Your star says: You deserve a bright and beautiful year!';setTimeout(next,1300)}
+function openGift(){$('gift').textContent='💝';$('feedback').textContent='The final surprise is ready!';setTimeout(next,900)}
+function next(){stage++;if(stage>=3){$('game').classList.add('hidden');$('final').classList.remove('hidden');$('bar').style.width='100%';celebrate()}else render()}
+function celebrate(){for(let i=0;i<24;i++){let s=document.createElement('span');s.className='spark';s.textContent=['✨','💗','⭐','🎉','🌸'][i%5];s.style.left=Math.random()*100+'vw';s.style.bottom='-30px';s.style.animationDelay=(Math.random()*.8)+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),3500)}}
+</script>
+</body>
+</html>
